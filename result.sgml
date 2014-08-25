@@ -1,0 +1,398 @@
+<!-- FIXED EPIC ERROR: @morerows attributes inconsistent! Table 1 Row 3 -->
+<!-- FIXED EPIC ERROR: @morerows attributes inconsistent! Table 1 Row 8 -->
+<!-- FIXED EPIC ERROR: @morerows attributes inconsistent! Table 2 Row 3 -->
+<!-- FIXED EPIC ERROR: @morerows attributes inconsistent! Table 3 Row 3 -->
+<!-- FIXED EPIC ERROR: @morerows attributes inconsistent! Table 3 Row 8 -->
+<!-- FIXED EPIC ERROR: @morerows attributes inconsistent! Table 4 Row 2 -->
+<!-- FIXED EPIC ERROR: @morerows attributes inconsistent! Table 4 Row 5 -->
+
+<test>
+         <TABLE TOCENTRY="1">
+                 <TITLE>Table 1 </TITLE>
+                 <TGROUP ALIGN="LEFT" CHAR="" CHAROFF="50" COLS="3">
+                         <COLSPEC COLNAME="COL1">
+                                 <COLSPEC COLNAME="COL2">
+                                         <COLSPEC COLNAME="COL3">
+                                                 <TBODY VALIGN="TOP">
+                                                         <ROW>
+                                                                 <ENTRY MOREROWS="1">R1C1 - R2C1 - R3C1 </ENTRY>
+                                                                 <ENTRY>R1C2 </ENTRY>
+                                                                 <ENTRY>R1C3 </ENTRY>
+                                                         </ROW>
+                                                         <ROW>
+                                                                 <ENTRY MOREROWS="0">R2C2 - R3C2 </ENTRY>
+                                                                 <ENTRY MOREROWS="0">R2C3 - R3C3 </ENTRY>
+                                                         </ROW>
+                                                         <ROW>
+                                                                 <ENTRY MOREROWS="1">R4C1 - R5C1 </ENTRY>
+                                                                 <ENTRY>R4C2 </ENTRY>
+                                                                 <ENTRY>R4C3 </ENTRY>
+                                                         </ROW>
+                                                         <ROW>
+                                                                 <ENTRY MOREROWS="1">R5C2 - R6C2 </ENTRY>
+                                                                 <ENTRY MOREROWS="1">R5C3 - R6C3 </ENTRY>
+                                                         </ROW>
+                                                         <ROW>
+                                                                 <ENTRY>R6C1 </ENTRY>
+                                                         </ROW>
+                                                         <ROW>
+                                                                 <ENTRY MOREROWS="0">R7C1 - R8.C1 </ENTRY>
+                                                                 <ENTRY MOREROWS="1">R7C2 - R8C2 - R9C2 </ENTRY>
+                                                                 <ENTRY MOREROWS="0">R7C3 - R8C3 </ENTRY>
+                                                         </ROW>
+                                                         <ROW>
+                                                                 <ENTRY>R9C1 </ENTRY>
+                                                                 <ENTRY>R9C3 </ENTRY>
+                                                         </ROW>
+                                                         <ROW>
+                                                                 <ENTRY MOREROWS="1">R10.C1 - R11C1 </ENTRY>
+                                                                 <ENTRY MOREROWS="1">R10C2 - R11C2 </ENTRY>
+                                                                 <ENTRY>R10C3 </ENTRY>
+                                                         </ROW>
+                                                         <ROW>
+                                                                 <ENTRY>R11C3 </ENTRY>
+                                                         </ROW>
+                                                 </TBODY>
+                 </TGROUP>
+         </TABLE>
+<TITLE>Tables </TITLE>
+<TABLE TOCENTRY="1">
+         <TITLE>Table 1, row spanning error at row 3 </TITLE>
+         <TGROUP ALIGN="LEFT" CHAR="" CHAROFF="50" COLS="3">
+                 <COLSPEC COLNAME="COL1">
+                         <COLSPEC COLNAME="COL2">
+                                 <COLSPEC COLNAME="COL3">
+                                         <TBODY VALIGN="TOP">
+                                                 <ROW>
+                                                         <ENTRY>blub </ENTRY>
+                                                         <ENTRY>blub </ENTRY>
+                                                         <ENTRY>blub </ENTRY>
+                                                 </ROW>
+                                                 <ROW>
+                                                         <ENTRY MOREROWS="0">blub </ENTRY>
+                                                         <ENTRY MOREROWS="1">blub </ENTRY>
+                                                         <ENTRY MOREROWS="0">blub </ENTRY>
+                                                 </ROW>
+                                                 <ROW>
+                                                         <ENTRY>blub </ENTRY>
+                                                         <ENTRY>blub </ENTRY>
+                                                 </ROW>
+                                                 <ROW>
+                                                         <ENTRY MOREROWS="1">blub </ENTRY>
+                                                         <ENTRY>blub </ENTRY>
+                                                         <ENTRY MOREROWS="1">blub </ENTRY>
+                                                 </ROW>
+                                                 <ROW>
+                                                         <ENTRY>blub </ENTRY>
+                                                 </ROW>
+                                         </TBODY>
+         </TGROUP>
+</TABLE>
+
+<TABLE TOCENTRY="1">
+         <TITLE>Table 2, row spanning error at row 3 and 8 </TITLE>
+         <TGROUP ALIGN="LEFT" CHAR="" CHAROFF="50" COLS="3">
+                 <COLSPEC COLNAME="COL1">
+                         <COLSPEC COLNAME="COL2">
+                                 <COLSPEC COLNAME="COL3">
+                                         <TBODY VALIGN="TOP">
+                                                 <ROW>
+                                                         <ENTRY MOREROWS="1">blub </ENTRY>
+                                                         <ENTRY>blub </ENTRY>
+                                                         <ENTRY>blub </ENTRY>
+                                                 </ROW>
+                                                 <ROW>
+                                                         <ENTRY MOREROWS="0">blub </ENTRY>
+                                                         <ENTRY MOREROWS="0">blub </ENTRY>
+                                                 </ROW>
+                                                 <ROW>
+                                                         <ENTRY MOREROWS="1">blub </ENTRY>
+                                                         <ENTRY>blub </ENTRY>
+                                                         <ENTRY>blub </ENTRY>
+                                                 </ROW>
+                                                 <ROW>
+                                                         <ENTRY MOREROWS="1">blub </ENTRY>
+                                                         <ENTRY MOREROWS="1">blub </ENTRY>
+                                                 </ROW>
+                                                 <ROW>
+                                                         <ENTRY>cell 6.1 </ENTRY>
+                                                 </ROW>
+                                                 <ROW>
+                                                         <ENTRY MOREROWS="0">blub </ENTRY>
+                                                         <ENTRY MOREROWS="1">blub </ENTRY>
+                                                         <ENTRY MOREROWS="0">blub </ENTRY>
+                                                 </ROW>
+                                                 <ROW>
+                                                         <ENTRY>blub </ENTRY>
+                                                         <ENTRY>blub </ENTRY>
+                                                 </ROW>
+                                                 <ROW>
+                                                         <ENTRY MOREROWS="1">blub </ENTRY>
+                                                         <ENTRY MOREROWS="1">blub </ENTRY>
+                                                         <ENTRY>blub </ENTRY>
+                                                 </ROW>
+                                                 <ROW>
+                                                         <ENTRY>blub </ENTRY>
+                                                 </ROW>
+                                         </TBODY>
+         </TGROUP>
+</TABLE>
+
+<TABLE TOCENTRY="1">
+         <TITLE>Table 3, row spanning error at row 3 and 5 </TITLE>
+         <TGROUP ALIGN="LEFT" CHAR="" CHAROFF="50" COLS="3">
+                 <COLSPEC COLNAME="COL1">
+                         <COLSPEC COLNAME="COL2">
+                                 <COLSPEC COLNAME="COL3">
+                                         <TBODY VALIGN="TOP">
+                                                 <ROW>
+                                                         <ENTRY MOREROWS="0">blub </ENTRY>
+                                                         <ENTRY MOREROWS="1">blub </ENTRY>
+                                                         <ENTRY MOREROWS="0">blub </ENTRY>
+                                                 </ROW>
+                                                 <ROW>
+                                                         <ENTRY>blub </ENTRY>
+                                                         <ENTRY>blub </ENTRY>
+                                                 </ROW>
+                                                 <ROW>
+                                                         <ENTRY MOREROWS="0">blub </ENTRY>
+                                                         <ENTRY MOREROWS="1" NAMEST="COL2" NAMEEND="COL3">blub </ENTRY>
+                                                 </ROW>
+                                                 <ROW>
+                                                         <ENTRY> </ENTRY> <!-- correct empty cell -->
+                                                 </ROW>
+                                         </TBODY>
+         </TGROUP>
+</TABLE>
+
+<Table>
+         <title>This is a correct table but insanely merged </title>
+         <Tgroup cols="10">
+                 <Colspec colnum="1" colname="col1" colwidth="*"/>
+                 <Colspec colnum="2" colname="col2" colwidth="*"/>
+                 <Colspec colnum="3" colname="col3" colwidth="*"/>
+                 <Colspec colnum="4" colname="col4" colwidth="*"/>
+                 <Colspec colnum="5" colname="col5" colwidth="*"/>
+                 <Colspec colnum="6" colname="col6" colwidth="*"/>
+                 <Colspec colnum="7" colname="col7" colwidth="*"/>
+                 <Colspec colnum="8" colname="col8" colwidth="*"/>
+                 <Colspec colnum="9" colname="col9" colwidth="*"/>
+                 <Colspec colnum="10" colname="col10" colwidth="*"/>
+                 <Tbody>
+                         <Row>
+                                 <Entry colname="col1">
+                                         <P>r1c1 </P>
+                                 </Entry>
+                                 <Entry colname="col2" morerows="8">
+                                         <P>r1c2 </P>
+                                         <P>r2c2 </P>
+                                         <P>r3c2 </P>
+                                         <P>r4c2 </P>
+                                         <P>r5c2 </P>
+                                         <P>r6c2 </P>
+                                         <P>r7c2 </P>
+                                         <P>r8c2 </P>
+                                         <P>r9c2 </P>
+                                 </Entry>
+                                 <Entry colname="col3">
+                                         <P>r1c3 </P>
+                                 </Entry>
+                                 <Entry namest="col4" nameend="col6">
+                                         <P>r1c4 </P>
+                                         <P>r1c5 </P>
+                                         <P>r1c6 </P>
+                                 </Entry>
+                                 <Entry colname="col7">
+                                         <P>r1c7 </P>
+                                 </Entry>
+                                 <Entry colname="col8">
+                                         <P>r1c8 </P>
+                                 </Entry>
+                                 <Entry colname="col9">
+                                         <P>r1c9 </P>
+                                 </Entry>
+                                 <Entry colname="col10" morerows="9">
+                                         <P>r1c10 </P>
+                                         <P>r2c10 </P>
+                                         <P>r3c10 </P>
+                                         <P>r4c10 </P>
+                                         <P>r5c10 </P>
+                                         <P>r6c10 </P>
+                                         <P>r7c10 </P>
+                                         <P>r8c10 </P>
+                                         <P>r9c10 </P>
+                                         <P>r10c10 </P>
+                                 </Entry>
+                         </Row>
+                         <Row>
+                                 <Entry colname="col1">
+                                         <P>r2c1 </P>
+                                 </Entry>
+                                 <Entry colname="col3">
+                                         <P>r2c3 </P>
+                                 </Entry>
+                                 <Entry colname="col4">
+                                         <P>r2c4 </P>
+                                 </Entry>
+                                 <Entry namest="col5" nameend="col7">
+                                         <P>r2c5 </P>
+                                         <P>r2c6 </P>
+                                         <P>r2c7 </P>
+                                 </Entry>
+                                 <Entry colname="col8" morerows="5">
+                                         <P>r2c8 </P>
+                                         <P>r3c8 </P>
+                                         <P>r4c8 </P>
+                                         <P>r5c8 </P>
+                                         <P>r6c8 </P>
+                                         <P>r7c8 </P>
+                                 </Entry>
+                                 <Entry colname="col9">
+                                         <P>r2c9 </P>
+                                 </Entry>
+                         </Row>
+                         <Row>
+                                 <Entry colname="col1">
+                                         <P>r3c1 </P>
+                                 </Entry>
+                                 <Entry namest="col3" nameend="col4">
+                                         <P>r3c3 </P>
+                                         <P>r3c4 </P>
+                                 </Entry>
+                                 <Entry namest="col5" nameend="col6">
+                                         <P>r3c5 </P>
+                                         <P>r3c6 </P>
+                                 </Entry>
+                                 <Entry colname="col7">
+                                         <P>r2c7 </P>
+                                 </Entry>
+                                 <Entry colname="col9" morerows="7">
+                                         <P>r3c9 </P>
+                                         <P>r4c9 </P>
+                                         <P>r5c9 </P>
+                                         <P>r6c9 </P>
+                                         <P>r7c9 </P>
+                                         <P>r8c9 </P>
+                                         <P>r9c9 </P>
+                                         <P>r10c9 </P>
+                                 </Entry>
+                         </Row>
+                         <Row>
+                                 <Entry colname="col1">
+                                         <P>r4c1 </P>
+                                 </Entry>
+                                 <Entry namest="col3" nameend="col6">
+                                         <P>r4c3 </P>
+                                         <P>r4c4 </P>
+                                         <P>r4c5 </P>
+                                         <P>r4c6 </P>
+                                 </Entry>
+                                 <Entry colname="col7">
+                                         <P>r2c7 </P>
+                                 </Entry>
+                         </Row>
+                         <Row>
+                                 <Entry colname="col1">
+                                         <P>r5c1 </P>
+                                 </Entry>
+                                 <Entry colname="col3">
+                                         <P>r5c3 </P>
+                                 </Entry>
+                                 <Entry namest="col4" nameend="col5">
+                                         <P>r5c4 </P>
+                                         <P>r5c5 </P>
+                                 </Entry>
+                                 <Entry colname="col6">
+                                         <P>r5c6 </P>
+                                 </Entry>
+                                 <Entry colname="col7">
+                                         <P>r2c7 </P>
+                                 </Entry>
+                         </Row>
+                         <Row>
+                                 <Entry colname="col1">
+                                         <P>r6c1 </P>
+                                 </Entry>
+                                 <Entry colname="col3">
+                                         <P>r6c3 </P>
+                                 </Entry>
+                                 <Entry colname="col4">
+                                         <P>r6c4 </P>
+                                 </Entry>
+                                 <Entry colname="col5">
+                                         <P>r6c5 </P>
+                                 </Entry>
+                                 <Entry colname="col6">
+                                         <P>r6c6 </P>
+                                 </Entry>
+                                 <Entry colname="col7">
+                                         <P>r2c7 </P>
+                                 </Entry>
+                         </Row>
+                         <Row>
+                                 <Entry colname="col1" morerows="2">
+                                         <P>r7c1 </P>
+                                         <P>r8c1 </P>
+                                         <P>r9c1 </P>
+                                 </Entry>
+                                 <Entry colname="col3" morerows="2">
+                                         <P>r7c3 </P>
+                                         <P>r8c3 </P>
+                                         <P>r9c3 </P>
+                                 </Entry>
+                                 <Entry colname="col4">
+                                         <P>r7c4 </P>
+                                 </Entry>
+                                 <Entry colname="col5" morerows="2">
+                                         <P>r7c5 </P>
+                                         <P>r8c5 </P>
+                                         <P>r9c5 </P>
+                                 </Entry>
+                                 <Entry colname="col6" morerows="1">
+                                         <P>r7c6 </P>
+                                         <P>r8c6 </P>
+                                 </Entry>
+                                 <Entry colname="col7" morerows="2">
+                                         <P>r2c7 </P>
+                                         <P>r2c7 </P>
+                                         <P>r2c7 </P>
+                                 </Entry>
+                         </Row>
+                         <Row>
+                                 <Entry colname="col4">
+                                         <P>r8c4 </P>
+                                 </Entry>
+                                 <Entry colname="col8">
+                                         <P>r8c8 </P>
+                                 </Entry>
+                         </Row>
+                         <Row>
+                                 <Entry colname="col4">
+                                         <P>r9c4 </P>
+                                 </Entry>
+                                 <Entry colname="col6">
+                                         <P>r9c6 </P>
+                                 </Entry>
+                                 <Entry colname="col8">
+                                         <P>r9c8 </P>
+                                 </Entry>
+                         </Row>
+                         <Row>
+                                 <Entry namest="col1" nameend="col7">
+                                         <P>r10c1 </P>
+                                         <P>r10c2 </P>
+                                         <P>r10c3 </P>
+                                         <P>r10c4 </P>
+                                         <P>r10c5 </P>
+                                         <P>r10c6 </P>
+                                         <P>r2c7 </P>
+                                 </Entry>
+                                 <Entry colname="col8">
+                                         <P>r10c8 </P>
+                                 </Entry>
+                         </Row>
+                 </Tbody>
+         </Tgroup>
+</Table>
+
+</test>
