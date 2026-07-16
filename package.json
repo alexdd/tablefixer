@@ -7,8 +7,10 @@
     "tablefixer": "bin/tablefixer.js"
   },
   "scripts": {
-    "fix": "node bin/tablefixer.js broken.sgml",
-    "test": "node test/compare-geometry.js"
+    "start": "node bin/tablefixer.js broken.sgml",
+    "test": "node --test test/unit/*.test.js && node test/compare-geometry.js",
+    "test:unit": "node --test test/unit/*.test.js",
+    "test:geometry": "node test/compare-geometry.js"
   },
   "engines": {
     "node": ">=14"

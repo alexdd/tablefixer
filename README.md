@@ -72,8 +72,12 @@ node bin/tablefixer.js broken.sgml > fixed.sgml
 # Arbitrary input file
 node bin/tablefixer.js path/to/file.sgml > out.sgml
 
-# Compare geometry against result.sgml
+# Unit tests for every exported function + geometry check vs result.sgml
 npm test
+
+# Unit tests only / geometry regression only
+npm run test:unit
+npm run test:geometry
 ```
 
 ### API
@@ -95,7 +99,8 @@ const { sgml, log, brokenRowCount } = fixCalsTables(input);
 | `result.sgml` | Reference output of the original |
 | `src/tablefixer.js` | Clearly commented Node.js port |
 | `bin/tablefixer.js` | CLI |
-| `test/compare-geometry.js` | CALS geometry comparison against `result.sgml` |
+| `test/unit/*.test.js` | Unit tests for every exported function |
+| `test/compare-geometry.js` | End-to-end CALS geometry comparison against `result.sgml` |
 
 ---
 

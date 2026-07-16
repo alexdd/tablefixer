@@ -43,7 +43,13 @@ function getAttr(tagBody, name) {
   const needle = name.toLowerCase();
   for (const part of tagBody.split(' ')) {
     if (!part.toLowerCase().startsWith(needle + '=')) continue;
-    return part.split('=').slice(1).join('=').replace(/^["']|["'/]$/g, '');
+    // Mirror Python str.strip('"/'): peel quotes/slashes from both ends
+    return part
+      .split('=')
+      .slice(1)
+      .join('=')
+      .replace(/^["']+/, '')
+      .replace(/["'/]+$/, '');
   }
   return null;
 }
@@ -473,4 +479,5 @@ module.exports = {
   getAttr,
   resolveHorizontalSpans,
   isEmptyPhantomRow,
+  rewriteMorerows,
 };
