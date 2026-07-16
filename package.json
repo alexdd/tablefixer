@@ -1,0 +1,18 @@
+{
+  "name": "tablefixer",
+  "version": "2.0.0",
+  "description": "Repair inconsistent CALS table morerows geometry in SGML documents",
+  "main": "src/tablefixer.js",
+  "bin": {
+    "tablefixer": "bin/tablefixer.js"
+  },
+  "scripts": {
+    "fix": "node bin/tablefixer.js broken.sgml",
+    "test": "node test/compare-geometry.js"
+  },
+  "engines": {
+    "node": ">=14"
+  },
+  "license": "MIT",
+  "author": "Port of Alex Düsel's 2014 tablefixer experiment"
+}
