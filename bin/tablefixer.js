@@ -2,13 +2,13 @@
 'use strict';
 
 /**
- * CLI für tablefixer
+ * CLI for tablefixer
  *
- * Verwendung:
+ * Usage:
  *   node bin/tablefixer.js [input.sgml] > output.sgml
  *   npm start
  *
- * Ohne Argument wird broken.sgml im aktuellen Arbeitsverzeichnis gelesen.
+ * Without an argument, broken.sgml in the current working directory is read.
  */
 
 const fs = require('fs');
@@ -18,7 +18,7 @@ const { fixCalsTables } = require('../src/tablefixer');
 const inputPath = path.resolve(process.argv[2] || 'broken.sgml');
 
 if (!fs.existsSync(inputPath)) {
-  console.error(`tablefixer: Datei nicht gefunden: ${inputPath}`);
+  console.error(`tablefixer: file not found: ${inputPath}`);
   process.exit(1);
 }
 

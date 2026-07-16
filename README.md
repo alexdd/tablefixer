@@ -1,78 +1,78 @@
 # tablefixer
 
-Repariert inkonsistente **CALS-Tabellen-Geometrie** in SGML-Dokumenten — speziell fehlerhafte `@morerows`-Zeilenspans.
+Repairs inconsistent **CALS table geometry** in SGML documents — specifically broken `@morerows` row spans.
 
 ---
 
-## Wofür wurde der Algorithmus gebraucht?
+## What was the algorithm used for?
 
-Der Originalcode (`tablefixer.py`, © Alex Düsel 2014) stammt aus der technischen Dokumentation / SGML-Welt rund um das [CALS-Tabellenmodell](https://www.oasis-open.org/specs/a502.htm) (häufig in DocBook und ähnlichen DTDs).
+The original code (`tablefixer.py`, © Alex Düsel 2014) comes from technical documentation / the SGML world around the [CALS table model](https://www.oasis-open.org/specs/a502.htm) (common in DocBook and similar DTDs).
 
-In CALS bedeutet `@morerows` an einem `<entry>`: die Zelle reicht über so viele *weitere* Zeilen nach unten. In diesen Folgezeilen darf für die betroffene Spalte **kein** eigenes `<entry>` stehen — die Spalte ist bereits durch den Span belegt.
+In CALS, `@morerows` on an `<entry>` means the cell extends that many *additional* rows downward. In those following rows, the affected column must **not** have its own `<entry>` — the column is already occupied by the span.
 
-Beim Bearbeiten solcher Tabellen in SGML-/XML-Editoren (historisch u. a. **PTC Arbortext Editor / „Epic“**) entstanden typische Korruptionsmuster:
+When editing such tables in SGML/XML editors (historically including **PTC Arbortext Editor / “Epic”**), a typical corruption pattern appeared:
 
-* leere „Phantom“-`<row>`-Zeilen mit einem leeren `<entry>`
-* obwohl darüberliegende `@morerows` die Spalten dort noch belegen
-* die Summe aus neuen Zellen + aktiven Spans wird dann größer als `@cols`
+* empty “phantom” `<row>` elements with a single empty `<entry>`
+* even though overlying `@morerows` still occupy those columns
+* so new cells + active spans become greater than `@cols`
 
-Der Fixer war ein **Batch-Reparaturwerkzeug** für genau diesen Fall: kaputte CALS-Geometrie in SGML wieder gültig machen, ohne die restliche Dokumentstruktur anzufassen.
+The fixer was a **batch repair tool** for exactly that case: make broken CALS geometry in SGML valid again without rewriting the rest of the document structure.
 
-Referenz / Blog (Original): <http://www.mandarine.tv/#post-667>
-
----
-
-## Was macht der Algorithmus genau?
-
-Eingabe: SGML mit CALS-Tabellen (`broken.sgml`).  
-Ausgabe: SGML, in dem die Geometrie wieder stimmt (`result.sgml` als Referenz), plus Log-Kommentare über durchgeführte Fixes.
-
-Ablauf in vier Phasen:
-
-1. **Tokenisieren** — Zeichengenau in eine flache Liste von Tags zerlegen (kein vollständiger SGML-Parser; reicht für `table` / `tgroup` / `colspec` / `row` / `entry`).
-2. **Geometrie simulieren** — Pro Spalte einen Span-Zähler führen. Am Ende jeder Zeile prüfen:
-   `Anzahl neuer Zellen + noch aktive Spans > cols` → Geometrie kaputt.
-3. **Phantom-Zeilen erkennen** — Kaputte Zeilen, die nur aus einem leeren `<entry>` bestehen, als Löschkandidaten merken („FIXED EPIC ERROR …“).
-4. **Reparieren** — Diese Zeilen entfernen und alle `@morerows`, die in die gelöschte Zeile hineinragten, um `1` verringern.
-
-Korrekte, auch komplex gemergete Tabellen (siehe letzte Tabelle in den Testdaten) bleiben unverändert.
-
-Die SGML-Testdaten (`broken.sgml`) werden **nicht** verändert; sie sind die feste Eingabe-Referenz.
+Original reference / blog: <http://www.mandarine.tv/#post-667>
 
 ---
 
-## Experiment: Kurz-Python damals vs. LLM-Port heute
+## What does the algorithm do?
 
-Der ursprüngliche Python-2-Code war ein **Experiment**, wie kurz sich dieser kniffelige Spezialfall mit der Python-Standardbibliothek lösen lässt — dicht, wenig Abstraktion, dafür schwer lesbar.
+Input: SGML with CALS tables (`broken.sgml`).  
+Output: SGML with corrected geometry (`result.sgml` as reference), plus log comments describing the fixes.
 
-**Dieses Projekt ist das Gegenexperiment:** Wie gut können LLMs heute so einen Algorithmus analysieren, erklären und in eine klar strukturierte, ausführlich kommentierte Implementierung portieren?
+Four phases:
 
-| Damals (2014) | Heute |
+1. **Tokenize** — Split character-by-character into a flat tag list (not a full SGML parser; enough for `table` / `tgroup` / `colspec` / `row` / `entry`).
+2. **Simulate geometry** — Keep a per-column span counter. At the end of each row, check:
+   `new cells + still-active spans > cols` → geometry is broken.
+3. **Detect phantom rows** — Mark broken rows that consist of only one empty `<entry>` as deletion candidates (“FIXED EPIC ERROR …”).
+4. **Repair** — Remove those rows and decrement every `@morerows` that reached into the deleted row by `1`.
+
+Correct tables — including heavily merged ones (see the last table in the test data) — are left unchanged.
+
+The SGML test data (`broken.sgml`) must **not** be modified; it is the fixed input reference.
+
+---
+
+## Experiment: short Python then vs. LLM port now
+
+The original Python 2 code was an **experiment** in how briefly this tricky special case could be solved with the Python standard library — dense, little abstraction, hard to read.
+
+**This project is the counter-experiment:** How well can LLMs today analyze such an algorithm, explain it, and port it into a clearly structured, thoroughly commented implementation?
+
+| Then (2014) | Now |
 |---|---|
-| `tablefixer.py` — Python 2, möglichst kurz | `src/tablefixer.js` — Node.js, möglichst nachvollziehbar |
-| implizite Zustände, knappe Kommentare | benannte Phasen, dokumentierte Invarianten |
+| `tablefixer.py` — Python 2, as short as possible | `src/tablefixer.js` — Node.js, as understandable as possible |
+| implicit state, sparse comments | named phases, documented invariants |
 | `run.bat` → `result.sgml` | `npm start` / `npm test` |
 
-Der Originalcode bleibt im Repo erhalten.
+The original code remains in the repository.
 
 ---
 
-## Node.js-Modul (Standalone)
+## Node.js module (standalone)
 
-Keine Dependencies. Nur die Node.js-Standardbibliothek.
+No dependencies. Node.js standard library only.
 
-### Installation / Nutzung
+### Usage
 
 ```bash
-# Reparatur auf stdout (Standard-Eingabe: broken.sgml)
+# Repair to stdout (default input: broken.sgml)
 npm start
-# oder
+# or
 node bin/tablefixer.js broken.sgml > fixed.sgml
 
-# Beliebige Eingabedatei
-node bin/tablefixer.js pfad/zur/datei.sgml > out.sgml
+# Arbitrary input file
+node bin/tablefixer.js path/to/file.sgml > out.sgml
 
-# Geometrie gegen result.sgml prüfen
+# Compare geometry against result.sgml
 npm test
 ```
 
@@ -83,23 +83,23 @@ const { fixCalsTables } = require('./src/tablefixer');
 
 const input = require('fs').readFileSync('broken.sgml', 'utf8');
 const { sgml, log, brokenRowCount } = fixCalsTables(input);
-// sgml = Log-Kommentare + repariertes Dokument
+// sgml = log comments + repaired document
 ```
 
-### Dateien
+### Files
 
-| Datei | Rolle |
+| File | Role |
 |---|---|
-| `tablefixer.py` | Original-Algorithmus (Python 2, 2014) |
-| `broken.sgml` | Testdaten mit kaputter CALS-Geometrie (**unveränderlich**) |
-| `result.sgml` | Referenzausgabe des Originals |
-| `src/tablefixer.js` | Klar kommentierter Node.js-Port |
+| `tablefixer.py` | Original algorithm (Python 2, 2014) |
+| `broken.sgml` | Test data with broken CALS geometry (**immutable**) |
+| `result.sgml` | Reference output of the original |
+| `src/tablefixer.js` | Clearly commented Node.js port |
 | `bin/tablefixer.js` | CLI |
-| `test/compare-geometry.js` | Vergleich der CALS-Geometrie mit `result.sgml` |
+| `test/compare-geometry.js` | CALS geometry comparison against `result.sgml` |
 
 ---
 
-## Lizenz / Herkunft
+## License / provenance
 
-Originalalgorithmus: © Alex Düsel 2014 — <http://www.mandarine.tv>  
-Node.js-Port: LLM-gestütztes Analyse- und Portierungs-Experiment auf Basis dieses Repos.
+Original algorithm: © Alex Düsel 2014 — <http://www.mandarine.tv>  
+Node.js port: LLM-assisted analysis and porting experiment based on this repository.

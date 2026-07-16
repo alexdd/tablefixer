@@ -1,11 +1,11 @@
 'use strict';
 
 /**
- * Vergleicht die CALS-Geometrie der Node-Ausgabe mit result.sgml.
+ * Compare CALS geometry of the Node output against result.sgml.
  *
- * Whitespace und der Python-2-Print-Softspace werden ignoriert.
- * Geprüft werden pro Tabelle: Zeilenanzahl, Entry-Attribute
- * (morerows / namest / nameend) und die Fix-Log-Kommentare.
+ * Whitespace and Python 2 print softspace are ignored.
+ * Per table we check: row count, entry attributes
+ * (morerows / namest / nameend), and the fix-log comments.
  */
 
 const fs = require('fs');
@@ -19,11 +19,11 @@ const expected = fs.readFileSync(path.join(root, 'result.sgml'), 'utf8');
 const { sgml: actual, log, brokenRowCount } = fixCalsTables(broken);
 
 /**
- * Extrahiert aus serialisiertem SGML die Tabellen-Geometrie.
+ * Extract table geometry from serialized SGML.
  * @param {string} text
  */
 function extractGeometry(text) {
-  // Log-Kommentare am Anfang einsammeln
+  // Collect fix-log comments at the top
   const fixLogs = [...text.matchAll(/<!-- FIXED[^>]*-->/g)].map((m) => m[0]);
 
   const tags = tokenize(text);
@@ -78,12 +78,12 @@ function assert(cond, msg) {
 
 assert(
   act.fixLogs.join('\n') === exp.fixLogs.join('\n'),
-  'Fix-Log-Kommentare stimmen mit result.sgml überein'
+  'Fix-log comments match result.sgml'
 );
 
 assert(
   act.tables.length === exp.tables.length,
-  `Tabellenanzahl: actual=${act.tables.length} expected=${exp.tables.length}`
+  `Table count: actual=${act.tables.length} expected=${exp.tables.length}`
 );
 
 const n = Math.min(act.tables.length, exp.tables.length);
@@ -92,7 +92,7 @@ for (let t = 0; t < n; t++) {
   const eRows = exp.tables[t].rows;
   assert(
     aRows.length === eRows.length,
-    `Tabelle ${t + 1}: Zeilenanzahl actual=${aRows.length} expected=${eRows.length}`
+    `Table ${t + 1}: row count actual=${aRows.length} expected=${eRows.length}`
   );
 
   const rMax = Math.min(aRows.length, eRows.length);
@@ -101,7 +101,7 @@ for (let t = 0; t < n; t++) {
     const eEnt = eRows[r];
     assert(
       aEnt.length === eEnt.length,
-      `Tabelle ${t + 1} Zeile ${r + 1}: Entry-Anzahl actual=${aEnt.length} expected=${eEnt.length}`
+      `Table ${t + 1} row ${r + 1}: entry count actual=${aEnt.length} expected=${eEnt.length}`
     );
     const eMax = Math.min(aEnt.length, eEnt.length);
     for (let e = 0; e < eMax; e++) {
@@ -109,24 +109,24 @@ for (let t = 0; t < n; t++) {
         aEnt[e].morerows === eEnt[e].morerows &&
           aEnt[e].namest === eEnt[e].namest &&
           aEnt[e].nameend === eEnt[e].nameend,
-        `Tabelle ${t + 1} Zeile ${r + 1} Entry ${e + 1}: ` +
+        `Table ${t + 1} row ${r + 1} entry ${e + 1}: ` +
           `actual=${JSON.stringify(aEnt[e])} expected=${JSON.stringify(eEnt[e])}`
       );
     }
   }
 }
 
-assert(brokenRowCount === 7, `7 Phantom-Zeilen entfernt (war ${brokenRowCount})`);
-assert(log.includes('FIXED EPIC ERROR'), 'Log enthält FIXED EPIC ERROR');
+assert(brokenRowCount === 7, `7 phantom rows removed (was ${brokenRowCount})`);
+assert(log.includes('FIXED EPIC ERROR'), 'Log contains FIXED EPIC ERROR');
 
-// broken.sgml darf nicht verändert worden sein
+// broken.sgml must not have been modified
 const brokenNow = fs.readFileSync(path.join(root, 'broken.sgml'), 'utf8');
-assert(brokenNow === broken, 'broken.sgml unverändert');
+assert(brokenNow === broken, 'broken.sgml unchanged');
 
 if (failed) {
-  console.error(`\nGeometrie-Vergleich fehlgeschlagen (${passed} Checks ok).`);
+  console.error(`\nGeometry comparison failed (${passed} checks ok).`);
   process.exit(1);
 }
 
-console.log(`Alle ${passed} Geometrie-Checks bestanden.`);
-console.log(`Entfernte Phantom-Zeilen: ${brokenRowCount}`);
+console.log(`All ${passed} geometry checks passed.`);
+console.log(`Phantom rows removed: ${brokenRowCount}`);

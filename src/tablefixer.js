@@ -1,45 +1,42 @@
 'use strict';
 
 /**
- * tablefixer — CALS-Tabellen-Geometrie reparieren
- * ================================================
+ * tablefixer — repair CALS table geometry
+ * =========================================
  *
- * Port des Python-2-Experiments von Alex Düsel (2014).
+ * Port of Alex Düsel's Python 2 experiment (2014).
  *
  * Problem
  * -------
- * Im CALS-Tabellenmodell beschreibt @morerows an einem <entry>, über wie viele
- * *weitere* Zeilen die Zelle nach unten reicht. In den betroffenen Zeilen
- * dürfen dann keine eigenen <entry>-Elemente für diese Spalte stehen — die
- * Spalte ist bereits „belegt“.
+ * In the CALS table model, @morerows on an <entry> says how many *additional*
+ * rows the cell extends downward. In those following rows there must be no
+ * <entry> for that column — the column is already occupied.
  *
- * Manche SGML-/XML-Editoren (historisch u. a. PTC Arbortext Editor / „Epic“)
- * erzeugen beim Bearbeiten von Zeilenspans fehlerhafte Zwischenzeilen:
- * eine praktisch leere <row> mit einem leeren <entry>, obwohl alle Spalten
- * noch von darüberliegenden @morerows belegt sind. Die Tabellen-Geometrie
- * stimmt dann nicht mehr (zu viele Zellen / Spans pro Zeile).
+ * Some SGML/XML editors (historically including PTC Arbortext Editor / “Epic”)
+ * produce bad intermediate rows when editing row spans: a nearly empty <row>
+ * with an empty <entry>, even though every column is still covered by
+ * overlying @morerows. Table geometry then breaks (too many cells/spans per row).
  *
- * Lösung (dieser Algorithmus)
- * ---------------------------
- * 1. SGML grob in eine flache Tag-Liste tokenisieren (kein vollständiger Parser).
- * 2. Pro Tabelle die Spaltenbelegung zeilenweise simulieren.
- * 3. Zeilen erkennen, in denen Zellen + aktive Spans > @cols wären.
- * 4. Leere „Phantom“-Zeilen entfernen und alle @morerows, die in diese Zeile
- *    hineinragten, um 1 verringern.
+ * Solution (this algorithm)
+ * -------------------------
+ * 1. Tokenize SGML into a flat tag list (not a full parser).
+ * 2. Simulate per-table column occupancy row by row.
+ * 3. Detect rows where cells + active spans would exceed @cols.
+ * 4. Delete empty “phantom” rows and decrement every @morerows that reached
+ *    into that row by 1.
  *
- * Das Modul ist absichtlich standalone (nur Node.js-Standardbibliothek).
+ * The module is intentionally standalone (Node.js standard library only).
  */
 
 /**
- * Liest ein Attribut aus dem Tag-Rumpf (alles zwischen < und >).
- * Beispiel: getAttr('ENTRY MOREROWS="2" NAMEST="COL1"', 'morerows') → '2'
+ * Read an attribute from a tag body (everything between < and >).
+ * Example: getAttr('ENTRY MOREROWS="2" NAMEST="COL1"', 'morerows') → '2'
  *
- * Wie im Original: Attribute werden an Leerzeichen gesplittet; Werte dürfen
- * in doppelten Anführungszeichen stehen. Ein optionales '/' am Ende
- * (Selbstschluss <Colspec …/>) wird mit abgeschnitten.
+ * Same as the original: attributes are split on spaces; values may use double
+ * quotes. A trailing '/' (self-closing <Colspec …/>) is stripped.
  *
  * @param {string} tagBody
- * @param {string} name  Attributname, case-insensitive
+ * @param {string} name  attribute name, case-insensitive
  * @returns {string|null}
  */
 function getAttr(tagBody, name) {
@@ -52,18 +49,18 @@ function getAttr(tagBody, name) {
 }
 
 /**
- * Phase 1 — Zeichengenauer Tokenizer
- * ----------------------------------
- * Wandelt den SGML-Text in eine geordnete Liste von Knoten um:
+ * Phase 1 — character-accurate tokenizer
+ * --------------------------------------
+ * Turn SGML text into an ordered list of nodes:
  *
  *   { index, body, content }
  *
- * - body:    Tag-Rumpf ohne spitze Klammern („ENTRY MOREROWS="2"“)
- * - content: Zeichen *nach* diesem Tag bis zum nächsten „<“
- * - index:   laufende Nummer (0 = Text vor dem ersten Tag)
+ * - body:    tag body without angle brackets (“ENTRY MOREROWS="2"”)
+ * - content: characters *after* this tag until the next “<”
+ * - index:   running number (0 = text before the first tag)
  *
- * Kommentare (`<!-- … -->`) und PI werden wie normale Tags behandelt —
- * das reicht für diesen Fixer, weil wir nur table/row/entry auswerten.
+ * Comments (`<!-- … -->`) and PIs are treated like ordinary tags — good enough
+ * here because we only evaluate table/row/entry.
  *
  * @param {string} sgml
  * @returns {{ index: number, body: string, content: string }[]}
@@ -73,16 +70,16 @@ function tokenize(sgml) {
   let body = '';
   let content = '';
   let index = 0;
-  let insideTag = false; // false == wir sammeln content (nach „>“)
+  let insideTag = false; // false == collecting content (after “>”)
 
   for (let i = 0; i < sgml.length; i++) {
     const ch = sgml[i];
 
     if (ch === '>') {
-      // Tag-Ende: ab jetzt gehört alles zum content dieses Tags
+      // End of tag: everything from here belongs to this tag's content
       insideTag = false;
     } else if (ch === '<') {
-      // Neues Tag beginnt: vorheriges (body, content) abschließen
+      // New tag starts: finish the previous (body, content)
       tags.push({ index, body, content });
       index += 1;
       body = '';
@@ -95,28 +92,28 @@ function tokenize(sgml) {
     }
   }
 
-  // Letztes Tag (nach dem kein „<“ mehr kommt) ebenfalls übernehmen
+  // Also keep the last tag (no further “<” after it)
   tags.push({ index, body, content });
   return tags;
 }
 
 /**
- * Erzeugt aus den Entry-Metadaten einer Zeile die „aufgelöste“ Spaltenliste.
+ * Expand one row's entry metadata into a “resolved” column list.
  *
- * Horizontale Spans (@namest / @nameend) belegen mehrere Spalten. Für die
- * Geometrie-Prüfung zählen wir jede belegte Spalte einmal und merken uns
- * dabei den @morerows-Wert (vertikaler Span gilt für alle Spalten des
- * horizontalen Spans).
+ * Horizontal spans (@namest / @nameend) occupy multiple columns. For the
+ * geometry check we count each occupied column once and remember the
+ * @morerows value (the vertical span applies to every column of the
+ * horizontal span).
  *
- * Beispiel bei colspecs = [COL1, COL2, COL3]:
+ * Example with colspecs = [COL1, COL2, COL3]:
  *   entry namest=COL2 nameend=COL3 morerows=1
- * → resolved = [1, 1]  (zwei Spalten, jeweils morerows=1)
+ * → resolved = [1, 1]  (two columns, each morerows=1)
  *
  * @param {{ morerows: number, namest: string|null, nameend: string|null }[]} entries
  * @param {string[]} colspecs
  * @param {(msg: string) => void} log
  * @param {number} tableNumber
- * @returns {number[]}  morerows-Wert je belegter Spalte in dieser Zeile
+ * @returns {number[]}  morerows value per occupied column in this row
  */
 function resolveHorizontalSpans(entries, colspecs, log, tableNumber) {
   const resolved = [];
@@ -128,10 +125,10 @@ function resolveHorizontalSpans(entries, colspecs, log, tableNumber) {
         const start = colspecs.indexOf(entry.namest);
         const end = colspecs.indexOf(entry.nameend);
         if (start < 0 || end < 0) throw new Error('missing colspec');
-        // Anzahl *zusätzlicher* Spalten zwischen Start und Ende
+        // Number of *extra* columns between start and end
         spanning = Math.abs(end - start);
       } catch (_) {
-        // Meldung bewusst wie im Original (inkl. Tippfehler „namend“)
+        // Message kept identical to the original (including typo “namend”)
         log(
           `<!-- ERROR: @namest or @namend no correspondence in colspec! Table ${tableNumber} -->\n`
         );
@@ -140,7 +137,7 @@ function resolveHorizontalSpans(entries, colspecs, log, tableNumber) {
         resolved.push(entry.morerows);
       }
     }
-    // Die End-Spalte (bzw. die einzige Spalte ohne Horizontal-Span)
+    // End column (or the only column when there is no horizontal span)
     resolved.push(entry.morerows);
   }
 
@@ -148,31 +145,30 @@ function resolveHorizontalSpans(entries, colspecs, log, tableNumber) {
 }
 
 /**
- * Prüft, ob die gerade geschlossene Zeile wie eine „Phantom“-Fehlerzeile
- * aussieht: genau ein leeres <entry> (mit oder ohne explizites </entry>).
+ * Whether the just-closed row looks like a phantom error row: exactly one
+ * empty <entry> (with or without an explicit </entry>).
  *
- * tmpRow enthält die Knoten [row, entry] oder [row, entry, /entry].
+ * tmpRow holds the nodes [row, entry] or [row, entry, /entry].
  *
  * @param {{ index: number, body: string, content: string }[]} tmpRow
  * @returns {boolean}
  */
 function isEmptyPhantomRow(tmpRow) {
   if (tmpRow.length !== 2 && tmpRow.length !== 3) return false;
-  // content des <entry>-Öffnungstags muss (bis auf Whitespace) leer sein
+  // Content of the <entry> open tag must be empty aside from whitespace
   return tmpRow[1].content.replace(/[ \n\r]/g, '') === '';
 }
 
 /**
- * Phase 2 — Analyse: Tabellen-Geometrie simulieren und Phantom-Zeilen finden
- * --------------------------------------------------------------------------
- * Pro Spalte hält `activeSpans[col]` die Anzahl verbleibender Zeilen, die
- * noch von einem darüberliegenden @morerows belegt sind.
+ * Phase 2 — analyze: simulate table geometry and find phantom rows
+ * ----------------------------------------------------------------
+ * For each column, `activeSpans[col]` is how many remaining rows are still
+ * occupied by an overlying @morerows.
  *
- * Am Zeilenende gilt:
- *   belegte Spalten = neue Zellen dieser Zeile + noch aktive Spans
- * Wenn das > cols ist, ist die Geometrie kaputt. Typischer Auslöser in den
- * Testdaten: eine leere Phantom-Zeile, die der Editor eingefügt hat, obwohl
- * alle Spalten noch gespannt sind.
+ * At end of row:
+ *   occupied columns = new cells in this row + still-active spans
+ * If that is > cols, geometry is broken. Typical trigger in the test data:
+ * an empty phantom row inserted by the editor while every column is still spanned.
  *
  * @param {{ index: number, body: string, content: string }[]} tags
  * @returns {{
@@ -190,15 +186,15 @@ function analyze(tags) {
   /** @type {Map<number, { body: string, content: string }>} */
   const tree = new Map();
 
-  /** Phantom-Zeilen, die später gelöscht werden (Liste der Knoten der Zeile) */
+  /** Phantom rows to delete later (list of that row's nodes) */
   const brokenRows = [];
 
   let tableNumber = 0;
   let rowNumber = 0;
   let ncols = 0;
-  /** @type {number[]} Restlaufzeit der vertikalen Spans je Spalte */
+  /** @type {number[]} remaining lifetime of vertical spans per column */
   let activeSpans = [];
-  /** @type {string[]} colname-Werte der colspec-Reihenfolge */
+  /** @type {string[]} colname values in colspec order */
   let colspecs = [];
   /** @type {{ morerows: number, namest: string|null, nameend: string|null }[]} */
   let entries = [];
@@ -208,7 +204,7 @@ function analyze(tags) {
   for (const tag of tags) {
     const bodyLower = tag.body.toLowerCase();
 
-    // ---- <table …> : neue Tabelle, Zähler zurücksetzen --------------------
+    // ---- <table …> : new table, reset counters ----------------------------
     if (bodyLower.startsWith('table')) {
       rowNumber = 0;
       ncols = 0;
@@ -217,7 +213,7 @@ function analyze(tags) {
       tableNumber += 1;
     }
 
-    // ---- <tgroup cols="N"> : Spaltenanzahl und Span-Vektor ----------------
+    // ---- <tgroup cols="N"> : column count and span vector -----------------
     else if (bodyLower.startsWith('tgroup')) {
       const colsAttr = getAttr(tag.body, 'cols');
       if (colsAttr == null) {
@@ -229,7 +225,7 @@ function analyze(tags) {
       activeSpans = Array(ncols).fill(0);
     }
 
-    // ---- <colspec colname="…"> : Spaltennamen für namest/nameend ----------
+    // ---- <colspec colname="…"> : column names for namest/nameend ----------
     else if (bodyLower.startsWith('colspec')) {
       const colname = getAttr(tag.body, 'colname');
       if (colname == null) {
@@ -240,19 +236,19 @@ function analyze(tags) {
       }
     }
 
-    // ---- <row> : neue Zeile beginnen --------------------------------------
+    // ---- <row> : start a new row ------------------------------------------
     else if (bodyLower.startsWith('row')) {
       rowNumber += 1;
       entries = [];
       tmpRow = [tag];
     }
 
-    // ---- </entry> : nur für Phantom-Erkennung in tmpRow sammeln ----------
+    // ---- </entry> : collect only for phantom-row detection in tmpRow -----
     else if (bodyLower.startsWith('/entry')) {
       tmpRow.push(tag);
     }
 
-    // ---- <entry …> : Zelle mit optionalen Span-Attributen -----------------
+    // ---- <entry …> : cell with optional span attributes -------------------
     else if (bodyLower.startsWith('entry')) {
       let morerows = 0;
       let namest = null;
@@ -279,7 +275,7 @@ function analyze(tags) {
       tmpRow.push(tag);
     }
 
-    // ---- </row> : Geometrie dieser Zeile prüfen und Spans fortschreiben --
+    // ---- </row> : check this row's geometry and advance spans -------------
     else if (bodyLower.startsWith('/row')) {
       const resolved = resolveHorizontalSpans(
         entries,
@@ -290,20 +286,20 @@ function analyze(tags) {
       const ncells = resolved.length;
       const nspans = activeSpans.filter((n) => n > 0).length;
 
-      // Kernbedingung: mehr Belegungen als Spalten → Geometrie kaputt
+      // Core condition: more occupations than columns → broken geometry
       if (ncells + nspans > ncols) {
         if (isEmptyPhantomRow(tmpRow)) {
           brokenRows.push(tmpRow);
         }
-        // „EPIC“ bezieht sich auf den historischen Arbortext-Editor-Bug
+        // “EPIC” refers to the historical Arbortext editor bug
         appendLog(
           `<!-- FIXED EPIC ERROR: @morerows attributes inconsistent! Table ${tableNumber} Row ${rowNumber} -->\n`
         );
       }
 
-      // Span-Vektor für die *nächste* Zeile aktualisieren:
-      // - aktive Spans um 1 verringern
-      // - freie Spalten mit den morerows-Werten der neuen Zellen belegen
+      // Update the span vector for the *next* row:
+      // - decrement active spans by 1
+      // - fill free columns with the morerows values of the new cells
       let cellIndex = 0;
       for (let col = 0; col < ncols; col++) {
         if (activeSpans[col] > 0) {
@@ -315,7 +311,7 @@ function analyze(tags) {
           }
           cellIndex += 1;
         } else {
-          // Zu wenige Zellen, obwohl Spalten frei wären — ebenfalls inkonsistent
+          // Too few cells while columns are free — also inconsistent
           appendLog(
             `<!-- FIXED ERROR @morerows attributes inconsistent! Table ${tableNumber} Row ${rowNumber} -->\n`
           );
@@ -327,18 +323,18 @@ function analyze(tags) {
       }
     }
 
-    // ---- </table> : am Tabellenende dürfen keine Spans „offen“ bleiben ----
+    // ---- </table> : no spans may remain open at end of table --------------
     else if (bodyLower.startsWith('/table')) {
       const openSpans = activeSpans.filter((n) => n > 0);
       if (openSpans.length > 0) {
-        // Meldung bewusst wie im Original (Tippfehler „incinsistent“)
+        // Message kept identical to the original (typo “incinsistent”)
         appendLog(
           `<!-- ERROR: @morerows attributes incinsistent! Table ${tableNumber} -->\n`
         );
       }
     }
 
-    // Jeden Knoten im Baum ablegen (Index → body/content), auch Nicht-Table-Tags
+    // Store every node in the tree (index → body/content), including non-table tags
     tree.set(tag.index, { body: tag.body, content: tag.content });
   }
 
@@ -346,8 +342,8 @@ function analyze(tags) {
 }
 
 /**
- * Verringert @morerows an einem Tag-Rumpf um die Differenz, analog zum
- * Original: Ersetzung nach Muster MOREROWS="…", Ergebnis immer großgeschrieben.
+ * Rewrite @morerows on a tag body, matching the original: replace the
+ * MOREROWS="…" pattern; result is always written uppercase.
  *
  * @param {string} tagBody
  * @param {number} newMorerows
@@ -361,29 +357,29 @@ function rewriteMorerows(tagBody, newMorerows) {
 }
 
 /**
- * Phase 3 — Reparatur: Phantom-Zeilen löschen und @morerows anpassen
- * ------------------------------------------------------------------
- * Phantom-Zeilen werden von hinten nach vorn entfernt (wichtig, wenn eine
- * Tabelle mehrere Fehlerzeilen hat). Für jede gelöschte Zeile laufen wir
- * im Dokument *rückwärts* und verringern jedes @morerows, dessen Span bis
- * in die gelöschte Zeile gereicht hätte:
+ * Phase 3 — repair: delete phantom rows and adjust @morerows
+ * ----------------------------------------------------------
+ * Phantom rows are removed from back to front (important when one table has
+ * several bad rows). For each deleted row we walk *backward* through the
+ * document and decrement every @morerows whose span would have reached into
+ * the deleted row:
  *
- *   rowDistance = Anzahl von <row>-Starttags zwischen Entry und Phantom-Zeile
- *   wenn rowDistance <= morerows → dieser Span ragte hinein → morerows -= 1
+ *   rowDistance = number of <row> start tags between the entry and the phantom
+ *   if rowDistance <= morerows → that span reached into it → morerows -= 1
  *
  * @param {Map<number, { body: string, content: string }>} tree
  * @param {{ index: number, body: string, content: string }[][]} brokenRows
  */
 function fix(tree, brokenRows) {
-  // Index 0 ist der Text vor dem ersten „<“ — wie im Original verwerfen
+  // Index 0 is text before the first “<” — discard it like the original
   tree.delete(0);
 
-  // Von hinten: spätere Phantom-Zeilen zuerst, damit der Rückwärtslauf
-  // für frühere Fehler die schon gelöschten späteren Zeilen nicht mitzählt
+  // Back to front: later phantoms first so the backward walk for earlier
+  // errors does not count already-deleted later rows
   for (const tmpRow of [...brokenRows].reverse()) {
     const rowStart = tmpRow[0].index;
 
-    // Komplette Phantom-Zeile entfernen: <row> … </row>
+    // Remove the whole phantom row: <row> … </row>
     tree.delete(rowStart);
     let i = 1;
     while (true) {
@@ -397,13 +393,13 @@ function fix(tree, brokenRows) {
       i += 1;
     }
 
-    // Rückwärts bis zum Dokumentanfang: Spans kürzen, die in die
-    // gelöschte Zeile gezeigt haben
+    // Walk backward toward the document start: shorten spans that pointed
+    // into the deleted row
     let rowDistance = 0;
-    // Wie im Original: von rowStart-1 abwärts bis einschließlich Index 1
+    // Same as the original: from rowStart-1 down through index 1 inclusive
     for (let num = rowStart - 1; num >= 1; num--) {
       const elem = tree.get(num);
-      if (!elem) continue; // bereits gelöschte Knoten überspringen
+      if (!elem) continue; // skip nodes already deleted
 
       const lower = elem.body.toLowerCase();
       if (lower.startsWith('row')) {
@@ -413,7 +409,7 @@ function fix(tree, brokenRows) {
         const attr = getAttr(elem.body, 'morerows');
         if (attr != null) morerows = parseInt(attr, 10);
 
-        // Span reicht (noch) bis zur gelöschten Zeile → um 1 verkürzen
+        // Span still reaches the deleted row → shorten by 1
         const newMorerows =
           rowDistance <= morerows ? morerows - 1 : morerows;
 
@@ -425,12 +421,12 @@ function fix(tree, brokenRows) {
 }
 
 /**
- * Phase 4 — Serialisierung zurück nach SGML
- * -----------------------------------------
- * Knoten in Index-Reihenfolge als „<body>content“ ausgeben.
- * Im Gegensatz zum Python-2-`print`-Softspace erzeugen wir hier bewusst
- * *keine* künstlichen Leerzeichen zwischen Tags — die CALS-Geometrie
- * (welche Zeilen/Attribute) bleibt identisch zum Originalalgorithmus.
+ * Phase 4 — serialize back to SGML
+ * --------------------------------
+ * Emit nodes in index order as “<body>content”.
+ * Unlike Python 2 `print` softspace, we deliberately insert *no* artificial
+ * spaces between tags — CALS geometry (which rows/attributes) still matches
+ * the original algorithm.
  *
  * @param {Map<number, { body: string, content: string }>} tree
  * @param {string} log
@@ -440,7 +436,7 @@ function serialize(tree, log) {
   const keys = [...tree.keys()].sort((a, b) => a - b);
   let out = log;
   if (log && !log.endsWith('\n')) out += '\n';
-  // Leerraum zwischen Log und Dokument (wie `print log` + folgende Ausgabe)
+  // Blank line between log and document (like `print log` then further output)
   if (log) out += '\n';
 
   for (const key of keys) {
@@ -451,9 +447,9 @@ function serialize(tree, log) {
 }
 
 /**
- * Öffentliche API: SGML-String mit kaputter CALS-Geometrie → reparierter String.
+ * Public API: SGML string with broken CALS geometry → repaired string.
  *
- * @param {string} sgmlInput  Inhalt z. B. von broken.sgml
+ * @param {string} sgmlInput  e.g. contents of broken.sgml
  * @returns {{ sgml: string, log: string, brokenRowCount: number }}
  */
 function fixCalsTables(sgmlInput) {
