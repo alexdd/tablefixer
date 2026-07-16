@@ -72,13 +72,27 @@ node bin/tablefixer.js broken.sgml > fixed.sgml
 # Arbitrary input file
 node bin/tablefixer.js path/to/file.sgml > out.sgml
 
-# Unit tests for every exported function + geometry check vs result.sgml
+# Unit tests + geometry check + formal validation of tablefixer.py
 npm test
 
-# Unit tests only / geometry regression only
+# Individual suites
 npm run test:unit
 npm run test:geometry
+npm run test:formal
 ```
+
+### Formal validation of the original Python
+
+`test/formal-validation.py` checks that `tablefixer.py` is correct on the fixtures
+with respect to the CALS occupancy invariant \(I\):
+
+- **T1** `broken.sgml` violates \(I\) (7 row overflows)
+- **T2** re-running the Python algorithm reproduces `result.sgml` (log, geometry, bytes)
+- **T3** `result.sgml` / live Python output satisfy \(I\)
+- **T4** the Node port agrees with Python
+- **T5** repair soundness (only empty phantoms deleted; merged correct table untouched)
+
+Details: [`docs/FORMAL_VALIDATION.md`](docs/FORMAL_VALIDATION.md).
 
 ### API
 

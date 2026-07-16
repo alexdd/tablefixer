@@ -8,9 +8,10 @@
   },
   "scripts": {
     "start": "node bin/tablefixer.js broken.sgml",
-    "test": "node --test test/unit/*.test.js && node test/compare-geometry.js",
+    "test": "node --test test/unit/*.test.js && node test/compare-geometry.js && python3 test/formal-validation.py",
     "test:unit": "node --test test/unit/*.test.js",
-    "test:geometry": "node test/compare-geometry.js"
+    "test:geometry": "node test/compare-geometry.js",
+    "test:formal": "python3 test/formal-validation.py"
   },
   "engines": {
     "node": ">=14"
