@@ -1,4 +1,4 @@
-## (c) Alex Duesel 2014 <http://www.mandarine.tv>
+## (c) Alex Duesel 2014 <https://www.tekturcms.de>
 
 import re
 

@@ -18,7 +18,7 @@ When editing such tables in SGML/XML editors (historically including **PTC Arbor
 
 The fixer was a **batch repair tool** for exactly that case: make broken CALS geometry in SGML valid again without rewriting the rest of the document structure.
 
-Original reference / blog: <http://www.mandarine.tv/#post-667>
+Homepage: <https://www.tekturcms.de>
 
 ---
 
@@ -120,5 +120,11 @@ const { sgml, log, brokenRowCount } = fixCalsTables(input);
 
 ## License / provenance
 
-Original algorithm: © Alex Düsel 2014 — <http://www.mandarine.tv>  
+Original algorithm: © Alex Düsel 2014 — <https://www.tekturcms.de>  
 Node.js port: LLM-assisted analysis and porting experiment based on this repository.
+
+---
+
+## Note from Alex Düsel
+
+**I am not satisfied with this LLM result: the Node.js code is an exact copy of the original, but I had asked for a clear improvement. Experiment failed!**
